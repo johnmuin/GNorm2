@@ -19,10 +19,20 @@ from src_python.GeneNER import model_ner,ner_tag
 from src_python.SpeAss import model_sa,sa_tag
 
 import tensorflow as tf
+gpu = tf.config.list_physical_devices('GPU')
+print("Num GPUs Available: ", len(gpu))
+if len(gpu) > 0:
+    try:
+        # 统一设置所有GPU按需增长内存
+        for gpu in gpu:
+            tf.config.experimental.set_memory_growth(gpu, True)  # 全部启用或全部禁用
+    except RuntimeError as e:
+        print(e)  # 仅当GPU运行时已初始化会报错，可忽略
+    # tf.config.experimental.set_memory_growth(gpu[0], True)
 
 import bioc
 import stanza
-nlp_token = stanza.Pipeline(model_dir='gnorm_trained_models/stanza', lang='en', processors={'tokenize': 'spacy'},package='None', download_method=None) #package='craft' ;./gnorm_trained_models/stanza
+nlp_token = stanza.Pipeline(model_dir='/home/promer/apps/GNorm2.down/gnorm_trained_models/stanza', lang='en', processors={'tokenize': 'spacy'},package='None', download_method=None) #package='craft' ;./gnorm_trained_models/stanza
 
 def NER_BioC(infolder,infile,outpath,nn_model):
          
@@ -92,18 +102,18 @@ def NER_PubTator(infolder,infile,outpath,nn_model):
                 title=''
                 abstract=''
                 
-def geneNER(infolder, outpath, modelfile):
+def geneNER(infolder, outpath, modelfile, resources_dir):
     
     print('loading NER models........')    
         
     if modelfile.lower().find('bioformer')>=0:
-        vocabfiles={'labelfile':'./vocab/GeneNER_label.vocab',
-                        'checkpoint_path':'./gnorm_trained_models/bioformer-cased-v1.0/', #bioformer-cased-v1.0
+        vocabfiles={'labelfile':f'{resources_dir}/vocab/GeneNER_label.vocab',
+                        'checkpoint_path':f'{resources_dir}/gnorm_trained_models/bioformer-cased-v1.0/', #bioformer-cased-v1.0
                         'lowercase':False,
                         } 
     else:
-        vocabfiles={'labelfile':'./vocab/GeneNER_label.vocab',
-                    'checkpoint_path':'./gnorm_trained_models/BiomedNLP-PubMedBERT-base-uncased-abstract/',
+        vocabfiles={'labelfile':f'{resources_dir}/vocab/GeneNER_label.vocab',
+                    'checkpoint_path':f'{resources_dir}/gnorm_trained_models/BiomedNLP-PubMedBERT-base-uncased-abstract/',
                     'lowercase':True,
                     } 
         
@@ -591,7 +601,7 @@ def SA_PubTator(infolder,infile,outpath,nn_model,virus_set,prefix_dict):
 
     
 #SA main    
-def speciesAss(infolder,outpath, modelfile):
+def speciesAss(infolder,outpath, modelfile, resources_dir):
 
     if modelfile.lower().find('bioformer')>=0:
         model_type='bioformer'
@@ -601,13 +611,13 @@ def speciesAss(infolder,outpath, modelfile):
     print('loading SA models........')     
     if model_type=='bioformer':
         
-        vocabfiles={'labelfile':'./vocab/SpeAss_IO_label.vocab',
-                    'checkpoint_path':'./gnorm_trained_models/bioformer-cased-v1.0/',
+        vocabfiles={'labelfile':f'{resources_dir}/vocab/SpeAss_IO_label.vocab',
+                    'checkpoint_path':f'{resources_dir}/gnorm_trained_models/bioformer-cased-v1.0/',
                     'lowercase':False,
                     }
     else:
-        vocabfiles={'labelfile':'./vocab/SpeAss_IO_label.vocab',
-                    'checkpoint_path':'./gnorm_trained_models/BiomedNLP-PubMedBERT-base-uncased-abstract/',
+        vocabfiles={'labelfile':f'{resources_dir}/vocab/SpeAss_IO_label.vocab',
+                    'checkpoint_path':f'{resources_dir}/gnorm_trained_models/BiomedNLP-PubMedBERT-base-uncased-abstract/',
                     'lowercase':True,
                     }
         
@@ -616,8 +626,8 @@ def speciesAss(infolder,outpath, modelfile):
     nn_model.build_softmax_decoder()
     nn_model.load_model(modelfile)
     
-    dict_filename={'prefix':'./Dictionary/SPPrefix.txt',
-                   'virus':'./Dictionary/SP_Virus2HumanList.txt'}
+    dict_filename={'prefix':f'{resources_dir}/Dictionary/SPPrefix.txt',
+                   'virus':f'{resources_dir}/Dictionary/SP_Virus2HumanList.txt'}
     fin=open(dict_filename['virus'],'r',encoding='utf-8')
     virus_set=set(fin.read().strip().split('\n'))
     fin.close()
@@ -670,6 +680,7 @@ if __name__=='__main__':
     parser.add_argument('--SAmodel', '-s', help="trained deep learning species assignment model file",default='')
     parser.add_argument('--NERoutpath', '-r', help="output folder to save the NER tagged results",default='./example/ner_output/')
     parser.add_argument('--SAoutpath', '-a', help="output folder to save the SA tagged results",default='./example/sa_output/')
+    parser.add_argument('--resources_dir', '-b', help="base directory of the resources of vocab and models",default='./resources')
     parser.add_argument('--NUM_THREADS', '-t', help="Number of threads",default='3')
     args = parser.parse_args()
        
@@ -703,11 +714,11 @@ if __name__=='__main__':
             os.makedirs(args.SAoutpath)
         
         #1. gene NER, the results are saved in outpath/ner_tmp/
-        geneNER(args.infolder,args.NERoutpath, args.NERmodel)
+        geneNER(args.infolder,args.NERoutpath, args.NERmodel, args.resources_dir)
         
         
         #2. species assignment, the results are saved in outpath/sa_tmp/
-        speciesAss(args.NERoutpath,args.SAoutpath, args.SAmodel)
+        speciesAss(args.NERoutpath,args.SAoutpath, args.SAmodel, args.resources_dir)
         
     elif args.NERmodel!='' and args.SAmodel=='':
         if args.infolder[-1]!='/':
@@ -722,7 +733,7 @@ if __name__=='__main__':
             os.makedirs(args.NERoutpath)
             
         print('==============\n| GeneNER |\n==============')
-        geneNER(args.infolder,args.NERoutpath,args.NERmodel)
+        geneNER(args.infolder,args.NERoutpath,args.NERmodel, args.resources_dir)
         
     elif args.NERmodel=='' and args.SAmodel!='':
         # only speass
@@ -732,7 +743,7 @@ if __name__=='__main__':
             os.makedirs(args.SAoutpath)
             
         print('==============\n| SpeAss |\n==============')
-        speciesAss(args.infolder,args.SAoutpath,args.SAmodel)
+        speciesAss(args.infolder,args.SAoutpath,args.SAmodel, args.resources_dir)
     else:
         print('Please provide models!')
         
