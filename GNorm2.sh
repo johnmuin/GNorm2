@@ -27,6 +27,6 @@ python GeneNER_SpeAss_run.py -i ${OUTPUT}/tmp_SR -r ${OUTPUT}/tmp_GNR -a ${OUTPU
 # GN
 java -Xmx60G -Xms30G -jar GNormPlus.jar ${OUTPUT}/tmp_SA ${OUTPUT} ${SETUP_DIR}/setup.GN.txt
 
-# rm tmp_SR/*
-# rm tmp_GNR/*
-# rm tmp_SA/*
+rm -rf ${OUTPUT}/tmp_SR/
+rm -rf ${OUTPUT}/tmp_GNR/
+rm -rf ${OUTPUT}/tmp_SA/
