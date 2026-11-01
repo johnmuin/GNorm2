@@ -146,7 +146,7 @@ public class BioCDoc
 		{
 			if(line.contains("|") && !line.contains("\t")) //Title|Abstract
         	{
-				String str[]=line.split("\\|",-1);
+				String str[]=line.split("\\|",3);
 				Pmid=str[0];
 				if(str[1].equals("t"))
 				{
@@ -472,7 +472,7 @@ public class BioCDoc
 		{
 			if(line.contains("|") && !line.contains("\t")) //Title|Abstract
         	{
-				String str[]=line.split("\\|",-1);
+				String str[]=line.split("\\|",3);
 				Pmid=str[0];
 				ParagraphContent.put(Pmid+"\t"+str[1],str[2]);
 				count_paragraph++;
