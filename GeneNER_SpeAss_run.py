@@ -32,7 +32,6 @@ if len(gpu) > 0:
 
 import bioc
 import stanza
-nlp_token = stanza.Pipeline(model_dir='/home/promer/apps/GNorm2.down/gnorm_trained_models/stanza', lang='en', processors={'tokenize': 'spacy'},package='None', download_method=None) #package='craft' ;./gnorm_trained_models/stanza
 
 def NER_BioC(infolder,infile,outpath,nn_model):
          
@@ -683,6 +682,11 @@ if __name__=='__main__':
     parser.add_argument('--resources_dir', '-b', help="base directory of the resources of vocab and models",default='./resources')
     parser.add_argument('--NUM_THREADS', '-t', help="Number of threads",default='3')
     args = parser.parse_args()
+    nlp_token = stanza.Pipeline(
+        model_dir=os.path.join(args.resources_dir, 'gnorm_trained_models', 'stanza'),
+        lang='en', processors={'tokenize': 'spacy'},
+        package='None', download_method=None,
+    )
        
     
     if args.NUM_THREADS.isdigit() == False:
