@@ -31,8 +31,9 @@ public class GeneNormalizationAbbreviationsTest {
                     + "paperA_7\tQARX\tandrogen receptor\t0.999\n"
                     + "paperB_3\tQARX\taldose reductase\t0.95\n"
                     + "low_1\tQARX\tandrogen receptor\t0.899999\n").getBytes(StandardCharsets.UTF_8));
-            GNormPlus.PT_Gene.insertMention("androgen receptor", "9606:367");
-            GNormPlus.PT_Gene.insertMention("aldose reductase", "9606:231");
+            // GN MentionMatch uses lexicon keys with spaces and punctuation removed.
+            GNormPlus.PT_Gene.insertMention("androgenreceptor", "9606:367");
+            GNormPlus.PT_Gene.insertMention("aldosereductase", "9606:231");
             DocumentAbbreviations.load(table.toString());
             GNormPlus.BioCDocobj.BioCReaderWithAnnotation(input.toString());
             new GN().GeneNormalization(input.toString(), output.toString(), false);
@@ -41,7 +42,7 @@ public class GeneNormalizationAbbreviationsTest {
                 for (ArrayList<String> passage : GNormPlus.BioCDocobj.Annotations.get(i)) {
                     for (String annotation : passage) {
                         String[] fields = annotation.split("\t");
-                        if (fields[2].equals("QARX")) observed.put(GNormPlus.BioCDocobj.PMIDs.get(i), fields[4]);
+                        if (fields[2].equals("QARX") && fields[4].contains("|")) observed.put(GNormPlus.BioCDocobj.PMIDs.get(i), fields[4]);
                     }
                 }
             }
