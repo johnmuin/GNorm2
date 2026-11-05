@@ -66,7 +66,7 @@ public class GNormPlus
 		String FocusSpecies = "";
 		if(args.length<2)
 		{
-			System.out.println("\n$ java -Xmx30G -Xms10G -jar GNormPlus.jar [InputFolder] [OutputFolder] [SetupFile]");
+			System.out.println("\n$ java -Xmx30G -Xms10G -jar GNormPlus.jar [InputFolder] [OutputFolder] [SetupFile] [FocusSpecies] [AbbreviationsTSV]");
 			System.out.println("[InputFolder] Default : input");
 			System.out.println("[OutputFolder] Default : output");
 			System.out.println("[SetupFile] Default : setup.txt\n\n");
@@ -88,6 +88,13 @@ public class GNormPlus
 			}
 		}
 		
+		// The optional fifth argument replaces internal extraction in this process.
+		boolean externalAbbreviations = args.length >= 5;
+		if (externalAbbreviations)
+		{
+			DocumentAbbreviations.load(args[4]);
+		}
+
 		BufferedReader br = new BufferedReader(new FileReader(SetupFile));
 		String line="";
 		Pattern ptmp = Pattern.compile("^	([A-Za-z0-9]+) = ([^ \\t\\n\\r]+)$");
@@ -537,7 +544,14 @@ public class GNormPlus
 						
 						/** load file */
 						GNR GNRobj = new GNR();
-						GNRobj.LoadInputFile(tmpFolder+"/"+InputFile,tmpFolder+"/"+InputFile+".Abb",TrainTest);
+						if (externalAbbreviations)
+						{
+							BioCDocobj.BioCReaderWithAnnotation(tmpFolder+"/"+InputFile);
+						}
+						else
+						{
+							GNRobj.LoadInputFile(tmpFolder+"/"+InputFile,tmpFolder+"/"+InputFile+".Abb",TrainTest);
+						}
 						SR SRobj = new SR();
 						SimConcept SCobj = new SimConcept();
 						GN GNobj = new GN();
