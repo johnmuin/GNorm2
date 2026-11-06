@@ -44,8 +44,10 @@ public class GeneNormalizationBetaTest {
             GN gn = new GN();
             gn.PreProcessing4GN(input.toString(), root.resolve("unused.xml").toString());
             gn.GeneNormalization(input.toString(), output.toString(), false);
-            Document before = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(input.toFile());
-            Document after = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(output.toFile());
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            Document before = factory.newDocumentBuilder().parse(input.toFile());
+            Document after = factory.newDocumentBuilder().parse(output.toFile());
             Map<String, String> observed = new TreeMap<>();
             NodeList docs = after.getElementsByTagName("document");
             if (docs.getLength() != taxa.length) throw new AssertionError("Document count changed");
