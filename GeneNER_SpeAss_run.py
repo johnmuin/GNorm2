@@ -135,11 +135,11 @@ def geneNER(infolder, outpath, modelfile, resources_dir):
             for line in fin:
                 pattern_bioc = re.compile('.*<collection>.*')
                 pattern_pubtator = re.compile('^([^\|]+)\|[^\|]+\|(.*)')
-                if pattern_pubtator.search(line):
-                    input_format="PubTator"
-                    break
-                elif pattern_bioc.search(line):
+                if pattern_bioc.search(line):
                     input_format="BioC"
+                    break
+                elif pattern_pubtator.search(line):
+                    input_format="PubTator"
                     break
             fin.close()
             if(input_format == "PubTator"):
@@ -656,11 +656,11 @@ def speciesAss(infolder,outpath, modelfile, resources_dir):
             for line in fin:
                 pattern_bioc = re.compile('.*<collection>.*')
                 pattern_pubtator = re.compile('^([^\|]+)\|[^\|]+\|(.*)')
-                if pattern_pubtator.search(line):
-                    file_format="PubTator"
-                    break
-                elif pattern_bioc.search(line):
+                if pattern_bioc.search(line):
                     file_format="BioC"
+                    break
+                elif pattern_pubtator.search(line):
+                    file_format="PubTator"
                     break
             fin.close()
             if(file_format == "PubTator"):
