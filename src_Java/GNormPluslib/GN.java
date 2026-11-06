@@ -421,7 +421,9 @@ public class GN
 				for(int ms=0;ms<GMs.length;ms++)
 				{
 					String mention = GMs[ms];
-					String IDstr = GNormPlus.PT_Gene.MentionMatch(mention); /** searched by PT_Gene */
+					// Match the BioC reader's beta transliteration only in the query;
+					// keep the original mention and assigned species unchanged.
+					String IDstr = GNormPlus.PT_Gene.MentionMatch(mention.replace('\u03b2', 'b'));
 					String IDs[]=IDstr.split("\\|");
 					
 					/*
